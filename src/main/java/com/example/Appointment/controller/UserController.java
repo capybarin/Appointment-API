@@ -4,9 +4,11 @@ import com.example.Appointment.entity.User;
 import com.example.Appointment.exception.ParameterMissingException;
 import com.example.Appointment.exception.UserNotFoundException;
 import com.example.Appointment.repository.UserRepository;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -71,7 +73,12 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    void deleteStudent(@PathVariable Long id){
-        repository.deleteById(id);
+    ResponseEntity<?> deleteStudent(@PathVariable Long id){
+        try {
+            repository.deleteById(id);
+        } catch (EmptyResultDataAccessException e){
+            throw new UserNotFoundException(id);
+        }
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 }
