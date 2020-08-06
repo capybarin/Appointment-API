@@ -1,5 +1,5 @@
-INSERT INTO role(name) VALUES ('ROLE_STUDENT');
-INSERT INTO role(name) VALUES ('ROLE_TEACHER');
+INSERT INTO role(name) VALUES ('STUDENT');
+INSERT INTO role(name) VALUES ('TEACHER');
 
 INSERT INTO users(firstName, lastName, role_id, email, password) VALUES ('Vlad', 'Bezd', 1, 'vladibzd@gmail.com', 'password');
 INSERT INTO users(firstName, lastName, role_id, email, password) VALUES ('Teacher', 'Test', 2, 'testmusor06@gmail.com', 'password');

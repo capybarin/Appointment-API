@@ -23,24 +23,14 @@ CREATE TABLE IF NOT EXISTS status
     name VARCHAR(20) NOT NULL
 );
 
-
-CREATE TABLE IF NOT EXISTS teacher_data
-(
-    id    BIGSERIAL PRIMARY KEY NOT NULL,
-    date  DATE NOT NULL ,
-    timeStart  TIME NOT NULL ,
-    timeEnd  TIME NOT NULL ,
-    workTime INTEGER NOT NULL ,
-    workPrice FLOAT NOT NULL ,
-    currency VARCHAR(3) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS appoint
 (
     id    BIGSERIAL PRIMARY KEY NOT NULL,
     date  DATE NOT NULL ,
     timeStart  TIME NOT NULL ,
     timeEnd  TIME NOT NULL ,
+    price VARCHAR(15) NOT NULL,
     status_id INTEGER NOT NULL ,
-    price VARCHAR(15) NOT NULL
+    teacher_id INTEGER NOT NULL ,
+    student_id INTEGER NOT NULL
 );

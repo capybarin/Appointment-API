@@ -3,10 +3,9 @@ package com.example.Appointment.controller;
 import com.example.Appointment.entity.User;
 import com.example.Appointment.exception.ParameterMissingException;
 import com.example.Appointment.exception.UserNotFoundException;
+import com.example.Appointment.repository.RoleRepository;
 import com.example.Appointment.repository.UserRepository;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,71 +13,58 @@ import java.util.List;
 @RestController
 public class UserController {
 
-    private final UserRepository repository;
+    @Autowired
+    private UserRepository userRepository;
 
-
-    UserController(UserRepository repository){
-        this.repository = repository;
-    }
+    @Autowired
+    private RoleRepository roleRepository;
 
     @GetMapping("/users")
     List<User> all(){
-        return repository.findAll();
+        return userRepository.findAll();
     }
 
-    @PostMapping("/users/register/student")
+    @PostMapping("/register")
     User newUser(@RequestBody User newUser) {
         User tmpUser = new User();
-            if (newUser.getFirstName() == null || newUser.getFirstName().isEmpty()) {
-                throw new ParameterMissingException("firstName");
-            } else {
-                tmpUser.setFirstName(newUser.getFirstName());
-            }
-            if (newUser.getLastName() == null || newUser.getLastName().isEmpty()) {
-                throw new ParameterMissingException("lastName");
-            } else {
-                tmpUser.setLastName(newUser.getLastName());
-            }
-            if (newUser.getEmail() == null || newUser.getEmail().isEmpty()) {
-                throw new ParameterMissingException("email");
-            } else {
-                tmpUser.setEmail(newUser.getEmail());
-            }
-            if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                throw new ParameterMissingException("password");
-            } else {
-                tmpUser.setPassword(newUser.getPassword());
-            }
-            tmpUser.setRole(1);
-            return repository.save(tmpUser);
+        if (newUser.getFirstName() == null || newUser.getFirstName().isEmpty()) {
+            throw new ParameterMissingException("firstName");
+        } else {
+            tmpUser.setFirstName(newUser.getFirstName());
+        }
+        if (newUser.getLastName() == null || newUser.getLastName().isEmpty()) {
+            throw new ParameterMissingException("lastName");
+        } else {
+            tmpUser.setLastName(newUser.getLastName());
+        }
+        System.out.println(newUser.toString());
+        System.out.println("Here: "+newUser.getRole_id().getId());
+        if (newUser.getRole_id().getId() == null ||
+                newUser.getRole_id().getId().toString().isEmpty()) {
+            throw new ParameterMissingException("role id");
+        } else {
+            if (newUser.getRole_id().getId().equals(1)){
+                tmpUser.setRole_id(roleRepository.findByName("STUDENT"));
+            } else if (newUser.getRole_id().getId().equals(2)){
+                tmpUser.setRole_id(roleRepository.findByName("TEACHER"));
+            } else throw new ParameterMissingException("role id");
+        }
+        if (newUser.getEmail() == null || newUser.getEmail().isEmpty()) {
+            throw new ParameterMissingException("email");
+        } else {
+            tmpUser.setEmail(newUser.getEmail());
+        }
+        if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
+            throw new ParameterMissingException("password");
+        } else {
+            tmpUser.setPassword(newUser.getPassword());
+        }
+        return userRepository.save(tmpUser);
     }
 
     @GetMapping("/users/{id}")
-    User one(@PathVariable Long id){
-        return repository.findById(id)
+    User one(@PathVariable Integer id){
+        return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    @PutMapping("/users/{id}")
-    User updateUser (@RequestBody User newUser, @PathVariable Long id){
-        return repository.findById(id)
-                .map(user -> {
-                    user.setEmail(newUser.getEmail());
-                    user.setFirstName(newUser.getFirstName());
-                    user.setLastName(newUser.getLastName());
-                    user.setPassword(newUser.getPassword());
-                    return repository.save(user);
-                })
-                .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    @DeleteMapping("/users/{id}")
-    ResponseEntity<?> deleteStudent(@PathVariable Long id){
-        try {
-            repository.deleteById(id);
-        } catch (EmptyResultDataAccessException e){
-            throw new UserNotFoundException(id);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 }

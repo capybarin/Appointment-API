@@ -1,12 +1,6 @@
 package com.example.Appointment.entity;
 
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Column;
-import java.util.Objects;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -15,7 +9,7 @@ public class User {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "firstname")
     private String firstName;
@@ -23,8 +17,9 @@ public class User {
     @Column(name = "lastname")
     private String lastName;
 
-    @Column(name = "role_id")
-    private int role;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role_id;
 
     @Column(name = "email", unique=true)
     private String email;
@@ -48,12 +43,12 @@ public class User {
         this.lastName = lastName;
     }
 
-    public int getRole() {
-        return role;
+    public Role getRole_id() {
+        return role_id;
     }
 
-    public void setRole(int role) {
-        this.role = role;
+    public void setRole_id(Role role_id) {
+        this.role_id = role_id;
     }
 
     public String getEmail() {
@@ -72,39 +67,21 @@ public class User {
         this.password = password;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id == user.id &&
-                role == user.role &&
-                firstName.equals(user.firstName) &&
-                lastName.equals(user.lastName) &&
-                email.equals(user.email) &&
-                password.equals(user.password);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, role, email, password);
-    }
-
-    @Override
     public String toString() {
-        return "student{" +
+        return "User{" +
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", role=" + role +
+                ", role=" + role_id +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
