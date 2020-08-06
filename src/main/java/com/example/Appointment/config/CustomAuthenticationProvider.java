@@ -8,10 +8,22 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+<<<<<<< HEAD
+=======
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+>>>>>>> 5fa5052e95126c63a55d1cce8b77f0c61a9793f9
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+<<<<<<< HEAD
+=======
+import java.util.ArrayList;
+import java.util.List;
+
+
+>>>>>>> 5fa5052e95126c63a55d1cce8b77f0c61a9793f9
 
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
@@ -34,7 +46,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         UserDetails principal = User.builder()
                 .username(myUser.getEmail())
                 .password(myUser.getPassword())
+<<<<<<< HEAD
                 .roles(myUser.getRole_id().getName())
+=======
+                .roles(myUser.getRole().getName())
+>>>>>>> 5fa5052e95126c63a55d1cce8b77f0c61a9793f9
                 .build();
         return new UsernamePasswordAuthenticationToken(
                 principal, password, principal.getAuthorities());
