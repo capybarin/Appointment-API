@@ -3,7 +3,9 @@ package com.example.Appointment.controller;
 import com.example.Appointment.entity.User;
 import com.example.Appointment.exception.ParameterMissingException;
 import com.example.Appointment.exception.UserNotFoundException;
+import com.example.Appointment.repository.RoleRepository;
 import com.example.Appointment.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,19 +16,18 @@ import java.util.List;
 @RestController
 public class UserController {
 
-    private final UserRepository repository;
+    @Autowired
+    private UserRepository userRepository;
 
-
-    UserController(UserRepository repository){
-        this.repository = repository;
-    }
+    @Autowired
+    private RoleRepository roleRepository;
 
     @GetMapping("/users")
     List<User> all(){
-        return repository.findAll();
+        return userRepository.findAll();
     }
 
-    @PostMapping("/users/register/student")
+    @PostMapping("/register")
     User newUser(@RequestBody User newUser) {
         User tmpUser = new User();
             if (newUser.getFirstName() == null || newUser.getFirstName().isEmpty()) {
@@ -49,36 +50,30 @@ public class UserController {
             } else {
                 tmpUser.setPassword(newUser.getPassword());
             }
-            tmpUser.setRole(1);
-            return repository.save(tmpUser);
+            tmpUser.setRole(roleRepository.findByName((newUser.getRole().getName())));
+            return userRepository.save(tmpUser);
     }
 
     @GetMapping("/users/{id}")
     User one(@PathVariable Long id){
-        return repository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    @PutMapping("/users/{id}")
-    User updateUser (@RequestBody User newUser, @PathVariable Long id){
-        return repository.findById(id)
-                .map(user -> {
-                    user.setEmail(newUser.getEmail());
-                    user.setFirstName(newUser.getFirstName());
-                    user.setLastName(newUser.getLastName());
-                    user.setPassword(newUser.getPassword());
-                    return repository.save(user);
-                })
+        return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @DeleteMapping("/users/{id}")
     ResponseEntity<?> deleteStudent(@PathVariable Long id){
         try {
-            repository.deleteById(id);
+            userRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e){
             throw new UserNotFoundException(id);
         }
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
+
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hi user";
+    }
+
 }
