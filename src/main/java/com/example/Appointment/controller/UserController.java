@@ -27,7 +27,7 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    @PostMapping("/users/register/student")
+    @PostMapping("/register")
     User newUser(@RequestBody User newUser) {
         User tmpUser = new User();
             if (newUser.getFirstName() == null || newUser.getFirstName().isEmpty()) {
@@ -60,19 +60,6 @@ public class UserController {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    @PutMapping("/users/{id}")
-    User updateUser (@RequestBody User newUser, @PathVariable Long id){
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setEmail(newUser.getEmail());
-                    user.setFirstName(newUser.getFirstName());
-                    user.setLastName(newUser.getLastName());
-                    user.setPassword(newUser.getPassword());
-                    return userRepository.save(user);
-                })
-                .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
     @DeleteMapping("/users/{id}")
     ResponseEntity<?> deleteStudent(@PathVariable Long id){
         try {
@@ -82,4 +69,11 @@ public class UserController {
         }
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
+
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hi user";
+    }
+
 }
