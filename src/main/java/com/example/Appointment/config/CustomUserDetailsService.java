@@ -23,11 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserDetails tmpUser = User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-<<<<<<< HEAD
                 .roles(user.getRole_id().getName())
-=======
-                .roles(user.getRole().getName())
->>>>>>> 5fa5052e95126c63a55d1cce8b77f0c61a9793f9
                 .build();
         return tmpUser;
     }

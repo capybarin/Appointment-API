@@ -15,28 +15,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomAuthenticationProvider authProvider;
 
-    /*@Autowired
-    public void configAuthentication(AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(authProvider);
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .httpBasic()
-                .and()
-                .authorizeRequests()
-                .antMatchers("/users/*").hasRole("TEACHER")
-                .antMatchers("/hello").hasRole("STUDENT")
-                .antMatchers("/register").permitAll()
-                .and()
-                .csrf().disable()
-                .formLogin().disable();
-    }*/
-
-    //@Autowired
-    //private CustomAuthenticationProvider customAuthenticationProvider;
-
     @Autowired
     public void configAuthentication(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authProvider);
@@ -48,12 +26,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/users/**").hasRole("TEACHER")
-<<<<<<< HEAD
-                .antMatchers("/appointments/teacher/**").hasRole("TEACHER")
-                .antMatchers("/appointments/student/**").hasRole("STUDENT")
-=======
->>>>>>> 5fa5052e95126c63a55d1cce8b77f0c61a9793f9
+                .antMatchers("/users/**", "/appointment").hasRole("TEACHER")
                 .antMatchers("/hello").hasRole("STUDENT")
                 .antMatchers("/register").permitAll()
                 .and()
