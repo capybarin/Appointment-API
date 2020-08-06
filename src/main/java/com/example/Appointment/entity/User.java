@@ -1,5 +1,7 @@
 package com.example.Appointment.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 
 @Entity
@@ -24,6 +26,7 @@ public class User {
     @Column(name = "email", unique=true)
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password")
     private String password;
 

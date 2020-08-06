@@ -1,40 +1,35 @@
 package com.example.Appointment.service;
 
 import com.example.Appointment.entity.User;
-import com.example.Appointment.repository.RoleRepository;
 import com.example.Appointment.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-
-
-
-    /*public UserEntity saveUser(UserEntity userEntity) {
-        RoleEntity userRole = roleEntityRepository.findByName("ROLE_USER");
-        userEntity.setRoleEntity(userRole);
-        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-        return userEntityRepository.save(userEntity);
-    }*/
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    /*public UserEntity findByLoginAndPassword(String login, String password) {
-        UserEntity userEntity = findByLogin(login);
-        if (userEntity != null) {
-            if (passwordEncoder.matches(password, userEntity.getPassword())) {
-                return userEntity;
-            }
+
+    public List<User> getUsers(List<User> currentList) {
+        List<User> actualList = new ArrayList<>();
+        for (User user: currentList) {
+            User tmpUser = new User();
+            tmpUser.setEmail(user.getEmail());
+            tmpUser.setFirstName(user.getFirstName());
+            tmpUser.setLastName(user.getLastName());
+            tmpUser.setRole_id(user.getRole_id());
+            tmpUser.setId(user.getId());
+            actualList.add(tmpUser);
         }
-        return null;
-    }*/
+        return actualList;
+    }
 }
