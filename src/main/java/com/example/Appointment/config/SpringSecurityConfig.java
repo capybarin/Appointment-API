@@ -15,6 +15,27 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomAuthenticationProvider authProvider;
 
+    /*@Autowired
+    public void configAuthentication(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(authProvider);
+    }
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .httpBasic()
+                .and()
+                .authorizeRequests()
+                .antMatchers("/users/*").hasRole("TEACHER")
+                .antMatchers("/hello").hasRole("STUDENT")
+                .antMatchers("/register").permitAll()
+                .and()
+                .csrf().disable()
+                .formLogin().disable();
+    }*/
+
+    //@Autowired
+    //private CustomAuthenticationProvider customAuthenticationProvider;
+
     @Autowired
     public void configAuthentication(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authProvider);
@@ -26,7 +47,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/users/**", "/appointment").hasRole("TEACHER")
+                .antMatchers("/users/**").hasRole("TEACHER")
                 .antMatchers("/hello").hasRole("STUDENT")
                 .antMatchers("/register").permitAll()
                 .and()
