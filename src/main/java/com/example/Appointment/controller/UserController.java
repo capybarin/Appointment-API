@@ -37,8 +37,6 @@ public class UserController {
         } else {
             tmpUser.setLastName(newUser.getLastName());
         }
-        System.out.println(newUser.toString());
-        System.out.println("Here: "+newUser.getRole_id().getId());
         if (newUser.getRole_id().getId() == null ||
                 newUser.getRole_id().getId().toString().isEmpty()) {
             throw new ParameterMissingException("role id");
