@@ -1,6 +1,7 @@
 package com.example.Appointment.entity;
 
 import javax.persistence.*;
+import java.sql.Time;
 import java.util.Objects;
 
 @Entity
@@ -16,10 +17,10 @@ public class Appoint {
     private String date;
 
     @Column(name = "timestart")
-    private String timestart;
+    private Time timestart;
 
     @Column(name = "timeend")
-    private String timeend;
+    private Time timeend;
 
     @Column(name = "price")
     private String price;
@@ -39,6 +40,10 @@ public class Appoint {
     @JoinColumn(name = "teacher_id")
     private User teacher_id;
 
+    @OneToOne
+    @JoinColumn(name = "teacher_data_id")
+    private TeacherData teacher_data_id;
+
     public Integer getId() {
         return id;
     }
@@ -55,19 +60,19 @@ public class Appoint {
         this.date = date;
     }
 
-    public String getTimestart() {
+    public Time getTimestart() {
         return timestart;
     }
 
-    public void setTimestart(String timestart) {
+    public void setTimestart(Time timestart) {
         this.timestart = timestart;
     }
 
-    public String getTimeend() {
+    public Time getTimeend() {
         return timeend;
     }
 
-    public void setTimeend(String timeend) {
+    public void setTimeend(Time timeend) {
         this.timeend = timeend;
     }
 
@@ -111,18 +116,27 @@ public class Appoint {
         this.teacher_id = teacher_id;
     }
 
+    public TeacherData getTeacher_data_id() {
+        return teacher_data_id;
+    }
+
+    public void setTeacher_data_id(TeacherData teacher_data_id) {
+        this.teacher_data_id = teacher_data_id;
+    }
+
     @Override
     public String toString() {
         return "Appoint{" +
                 "id=" + id +
                 ", date='" + date + '\'' +
-                ", timestart='" + timestart + '\'' +
-                ", timeend='" + timeend + '\'' +
+                ", timestart=" + timestart +
+                ", timeend=" + timeend +
                 ", price='" + price + '\'' +
                 ", currency='" + currency + '\'' +
                 ", status_id=" + status_id +
                 ", student_id=" + student_id +
                 ", teacher_id=" + teacher_id +
+                ", teacher_data_id=" + teacher_data_id +
                 '}';
     }
 
@@ -139,11 +153,12 @@ public class Appoint {
                 currency.equals(appoint.currency) &&
                 status_id.equals(appoint.status_id) &&
                 student_id.equals(appoint.student_id) &&
-                teacher_id.equals(appoint.teacher_id);
+                teacher_id.equals(appoint.teacher_id) &&
+                teacher_data_id.equals(appoint.teacher_data_id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, timestart, timeend, price, currency, status_id, student_id, teacher_id);
+        return Objects.hash(id, date, timestart, timeend, price, currency, status_id, student_id, teacher_id, teacher_data_id);
     }
 }
