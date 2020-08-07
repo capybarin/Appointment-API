@@ -1,18 +1,12 @@
 package com.example.Appointment.controller;
 
-import com.example.Appointment.entity.Appoint;
 import com.example.Appointment.entity.TeacherData;
 import com.example.Appointment.entity.User;
 import com.example.Appointment.exception.ParameterMissingException;
-import com.example.Appointment.exception.TeacherDataNotFoundException;
 import com.example.Appointment.exception.UserNotFoundException;
 import com.example.Appointment.exception.WrongParameterException;
-import com.example.Appointment.repository.AppointRepository;
-import com.example.Appointment.repository.RoleRepository;
-import com.example.Appointment.repository.TeacherDataRepository;
-import com.example.Appointment.repository.UserRepository;
+import com.example.Appointment.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +28,7 @@ public class Controller {
     private RoleRepository roleRepository;
 
     @Autowired
-    private AppointRepository appointRepository;
+    private StatusRepository statusRepository;
 
     @Autowired
     private TeacherDataRepository teacherDataRepository;
@@ -100,96 +94,73 @@ public class Controller {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    @GetMapping("/users/teacher/data")
-    public List <TeacherData> getAll(Authentication authentication){
-        return teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
-    }
-
     @PostMapping("/users/teacher/data")
-    public TeacherData newTeacherData(@RequestBody TeacherData newTeacherData, Authentication authentication) {
-        TeacherData tmpData = new TeacherData();
-        System.out.println("Work: "+newTeacherData.getWorkfrom());
-        System.out.println("Obj:" + newTeacherData.toString());
-        if (newTeacherData.getWorkfrom() == null){
-            throw new ParameterMissingException("workfrom");
-        }
-        if (newTeacherData.getWorkto() == null){
-            throw new ParameterMissingException("workto");
-        }
-        if (newTeacherData.getCurrency() == null || newTeacherData.getCurrency().isEmpty()){
-            throw new ParameterMissingException("currency");
-        }else {
-            tmpData.setCurrency(newTeacherData.getCurrency());
-        }
-        if (newTeacherData.getPrice() == null || newTeacherData.getPrice().isEmpty()){
-            throw new ParameterMissingException("price");
-        }else {
-            tmpData.setPrice(newTeacherData.getPrice());
-        }
-        tmpData.setTeacher_id(userRepository.findByEmail(authentication.getName()));
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    public TeacherData newData(@RequestBody TeacherData newData, Authentication authentication){
+        TeacherData tmp = new TeacherData();
+        LocalDate localDate = LocalDate.now();
         Date from;
         Date to;
-        try {
-            from = sdf.parse(String.valueOf(newTeacherData.getWorkfrom()));
-            to = sdf.parse(String.valueOf(newTeacherData.getWorkto()));
+        Date currDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        if (newData.getWorkfrom() == null) {
+            throw new ParameterMissingException("workfrom");
+        }
+        try{
+            from = simpleDateFormat.parse(String.valueOf(newData.getWorkfrom()));
         } catch (ParseException e) {
             throw new WrongParameterException("Invalid \"workfrom\" parameter");
+        }
+        if (newData.getWorkto() == null) {
+            throw new ParameterMissingException("workto");
+        }
+        try{
+            to = simpleDateFormat.parse(String.valueOf(newData.getWorkto()));
+        } catch (ParseException e) {
+            throw new WrongParameterException("Invalid \"workto\" parameter");
         }
         if (from.after(to)){
             throw new WrongParameterException("\"workto\" should not be before current \"workfrom\"");
         } else {
-            System.out.println("from "+newTeacherData.getWorkfrom()+"\nto "+newTeacherData.getWorkto());
-            tmpData.setWorkfrom(Time.valueOf(String.valueOf(newTeacherData.getWorkfrom())));
-            tmpData.setWorkto(Time.valueOf(String.valueOf(newTeacherData.getWorkto())));
+            tmp.setWorkfrom(Time.valueOf(String.valueOf(newData.getWorkfrom())));
+            tmp.setWorkto(Time.valueOf(String.valueOf(newData.getWorkto())));
         }
-        return teacherDataRepository.save(tmpData);
-    }
+        if (newData.getCurrency() == null || newData.getCurrency().isEmpty()) {
+            throw new ParameterMissingException("currency");
+        } else {
+            tmp.setCurrency(newData.getCurrency());
+        }
+        if (newData.getPrice() == null || newData.getPrice().isEmpty()) {
+            throw new ParameterMissingException("price");
+        } else {
+            tmp.setPrice(newData.getPrice());
+        }
+        tmp.setTeacher_id(userRepository.findByEmail(authentication.getName()));
 
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @DeleteMapping("/users/teacher/data/{id}")
-    public void deleteTeacherData(@PathVariable Integer id){
-        teacherDataRepository.deleteById(id);
-    }
-
-    @GetMapping("/users/teacher/data/{id}")
-    public TeacherData getTeacherData(@PathVariable Integer id){
-        return teacherDataRepository.findById(id)
-                .orElseThrow(() -> new TeacherDataNotFoundException(id));
-    }
-
-    @GetMapping("/appointment")
-    public List <Appoint> getAppointsForUser(Authentication authentication){
-        return appointRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
-    }
-
-    /*@PostMapping("/appointment")
-    public Appoint newAppoint(@RequestBody Appoint newAppoint){
-        Appoint tmpAppoint = new Appoint();
-        LocalDate localDate = LocalDate.now();
-        Date currDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    }*/
-    /*@PostMapping("/appointment")
-    Appoint newAppoint(@RequestBody Appoint newAppoint) {
-        Appoint tmpAppoint = new Appoint();
-        LocalDate localDate = LocalDate.now();
-        Date currDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date newDate;
-        try {
-            newDate = sdf.parse(newAppoint.getDate());
+        if (newData.getDate() == null){
+            throw new ParameterMissingException("date");
+        }
+        Date toBeParsed;
+        try{
+            toBeParsed = sdf.parse(String.valueOf(newData.getDate()));
         } catch (ParseException e) {
             throw new WrongParameterException("Invalid \"date\" parameter");
         }
-        if (newAppoint.getDate() == null || newAppoint.getDate().isEmpty() ){
-            throw new ParameterMissingException("date");
-        } else if (newDate.before(currDate)){
-            throw new WrongParameterException("Your date should not be before current date");
-        } else{
-            tmpAppoint.setDate(newAppoint.getDate());
+        if (toBeParsed.before(currDate)){
+            throw new WrongParameterException("Your \"date\" should not be before current date");
         }
+        tmp.setDate(newData.getDate());
 
-        return appointRepository.save(tmpAppoint);
-    }*/
+        if (!teacherDataRepository.findIfTimeSlotExists(userRepository.findByEmail(authentication.getName()).getId(),
+                newData.getDate(), newData.getWorkfrom()).isEmpty()){
+            throw new WrongParameterException("Time slots intersecting error");
+        } else {
+            return teacherDataRepository.save(tmp);
+        }
+    }
+
+    @GetMapping("/users/teacher/data")
+    public List<TeacherData> teacherData (){
+        return teacherDataRepository.findAll();
+    }
 }

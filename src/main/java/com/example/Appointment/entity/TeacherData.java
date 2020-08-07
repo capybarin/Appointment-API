@@ -3,7 +3,7 @@ package com.example.Appointment.entity;
 
 import javax.persistence.*;
 import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -27,7 +27,10 @@ public class TeacherData {
     @Column(name = "price")
     private String price;
 
-    @OneToOne
+    @Column(name = "date")
+    private LocalDate date;
+
+    @ManyToOne
     @JoinColumn(name = "teacher_id")
     private User teacher_id;
 
@@ -71,6 +74,14 @@ public class TeacherData {
         this.price = price;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
     public User getTeacher_id() {
         return teacher_id;
     }
@@ -83,10 +94,11 @@ public class TeacherData {
     public String toString() {
         return "TeacherData{" +
                 "id=" + id +
-                ", workfrom=" + workfrom +
+                ", workform=" + workfrom +
                 ", workto=" + workto +
                 ", currency='" + currency + '\'' +
                 ", price='" + price + '\'' +
+                ", date='" + date + '\'' +
                 ", teacher_id=" + teacher_id +
                 '}';
     }
@@ -101,11 +113,12 @@ public class TeacherData {
                 workto.equals(that.workto) &&
                 currency.equals(that.currency) &&
                 price.equals(that.price) &&
+                date.equals(that.date) &&
                 teacher_id.equals(that.teacher_id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, workfrom, workto, currency, price, teacher_id);
+        return Objects.hash(id, workfrom, workto, currency, price, date, teacher_id);
     }
 }
