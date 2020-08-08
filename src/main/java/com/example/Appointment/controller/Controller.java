@@ -1,7 +1,9 @@
 package com.example.Appointment.controller;
 
+import com.example.Appointment.entity.Appoint;
 import com.example.Appointment.entity.TeacherData;
 import com.example.Appointment.entity.User;
+import com.example.Appointment.exception.AppointNotFoundException;
 import com.example.Appointment.exception.ParameterMissingException;
 import com.example.Appointment.exception.UserNotFoundException;
 import com.example.Appointment.exception.WrongParameterException;
@@ -15,6 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +32,9 @@ public class Controller {
 
     @Autowired
     private StatusRepository statusRepository;
+
+    @Autowired
+    private AppointRepository appointRepository;
 
     @Autowired
     private TeacherDataRepository teacherDataRepository;
@@ -159,8 +165,56 @@ public class Controller {
         }
     }
 
+    @GetMapping("/users/teacher/data/me")
+    public List <TeacherData> getDataForCurrentUser (Authentication authentication){
+        return teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
+    }
+
     @GetMapping("/users/teacher/data")
     public List<TeacherData> teacherData (){
         return teacherDataRepository.findAll();
+    }
+
+    @PostMapping("/appointment")
+    public Appoint newAppoint(@RequestBody Appoint newAppoint, Authentication authentication) {
+        Appoint tmpAppoint = new Appoint();
+        tmpAppoint.setStatus_id(statusRepository.findByName("Open"));
+        tmpAppoint.setStudent_id(null);
+        if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("STUDENT")){
+            throw new WrongParameterException("Students cannot create new appointments");
+        }
+        List<TeacherData> data = teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
+        List<Integer> allowedIds = new ArrayList<>();
+        for (TeacherData td: data) {
+            allowedIds.add(td.getId());
+        }
+        if (newAppoint.getTeacher_data_id() == null){
+            throw new ParameterMissingException("teacher_data_id");
+        } else {
+            if (!allowedIds.contains(newAppoint.getTeacher_data_id().getId())){
+                throw new ParameterMissingException("You cannot use other teacher's ids");
+            }
+        }
+        tmpAppoint.setTeacher_data_id(newAppoint.getTeacher_data_id());
+        return appointRepository.save(tmpAppoint);
+    }
+
+    @GetMapping("/appointment")
+    public List<Appoint> getAllAppoints(){
+        return appointRepository.findAll();
+    }
+
+    @PostMapping("/appointment/{id}/reservation")
+    public Appoint makeReservation (@PathVariable Integer id, Authentication authentication){
+        Appoint appoint = appointRepository.findById(id).orElseThrow(() -> new AppointNotFoundException(id));
+        if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("TEACHER")){
+            throw new WrongParameterException("Teachers cannot make a reservation");
+        }
+        if (appoint.getStatus_id().getName().equals("Open")){
+            appoint.setStatus_id(statusRepository.findByName("Negotiation"));
+            appointRepository.save(appoint);
+            return appoint;
+        } else throw new WrongParameterException("You can't make a reservation with Appointment that is in the "
+                + appoint.getStatus_id().getName() + " status");
     }
 }
