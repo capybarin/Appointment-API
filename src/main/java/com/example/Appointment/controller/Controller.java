@@ -9,9 +9,13 @@ import com.example.Appointment.exception.UserNotFoundException;
 import com.example.Appointment.exception.WrongParameterException;
 import com.example.Appointment.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +32,9 @@ public class Controller {
     private UserRepository userRepository;
 
     @Autowired
+    private JavaMailSender javaMailSender;
+
+    @Autowired
     private RoleRepository roleRepository;
 
     @Autowired
@@ -38,6 +45,22 @@ public class Controller {
 
     @Autowired
     private TeacherDataRepository teacherDataRepository;
+
+    private void sendHelloMessage(User tmpUser){
+        MimeMessage msg = javaMailSender.createMimeMessage();
+        String text = "<p><br>Hello "+tmpUser.getFirstName()+",</br><br>Your API access credentials:</br><br>Login "
+                +tmpUser.getEmail()+"</br><br>Password "+tmpUser.getPassword()+"</br></p>";
+        MimeMessageHelper helper = null;
+        try {
+            helper = new MimeMessageHelper(msg, true);
+            helper.setTo(tmpUser.getEmail());
+            helper.setSubject("Thank you for sign up!");
+            helper.setText(text, true);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        javaMailSender.send(msg);
+    }
 
     @PostMapping("/register")
     public User newUser(@RequestBody User newUser) {
@@ -76,6 +99,7 @@ public class Controller {
         } else {
             tmpUser.setPassword(newUser.getPassword());
         }
+        sendHelloMessage(tmpUser);
         try {
             return userRepository.save(tmpUser);
         } catch (Exception e) {
