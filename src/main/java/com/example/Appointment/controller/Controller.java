@@ -224,7 +224,12 @@ public class Controller {
         if (appoint.getStatus_id().getName().equals("Open")) {
             appoint.setStatus_id(statusRepository.findByName("Negotiation"));
             appoint.setStudent_id(userRepository.findByEmail(authentication.getName()));
-            return appointRepository.save(appoint);
+            Appoint tmp = appointRepository.save(appoint);
+            emailSenderService.sendTimeReservationMessage(userRepository.findByTeacher_id(tmp.getTeacher_data_id().getTeacher_id().getId()),
+                    userRepository.findByEmail(authentication.getName()), tmp.getId(), 1);
+            emailSenderService.sendTimeReservationMessage(userRepository.findByTeacher_id(tmp.getTeacher_data_id().getTeacher_id().getId()),
+                    userRepository.findByEmail(authentication.getName()), tmp.getId(), 2);
+            return tmp;
         } else throw new WrongParameterException("You can't make a reservation with Appointment that is in the "
                 + appoint.getStatus_id().getName() + " status");
     }
