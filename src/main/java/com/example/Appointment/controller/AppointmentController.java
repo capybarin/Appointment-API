@@ -93,14 +93,10 @@ public class AppointmentController {
         if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("STUDENT")) {
             throw new WrongParameterException("Students cannot accept reservations");
         }
-        /*List<TeacherData> teacherData = teacherDataRepository.findAllByTeacher_id(appoint.getTeacher_data_id().getId());
-        List<Integer> allowedIds = new ArrayList<>();
-        for (TeacherData td : teacherData) {
-            allowedIds.add(td.getId());
-        }
-        if (!allowedIds.contains(appoint.getTeacher_data_id().getId())) {
+        if (!appoint.getTeacher_data_id().getTeacher_id().getId()
+                .equals(userRepository.findByEmail(authentication.getName()).getId())){
             throw new ParameterMissingException("You cannot use other teacher's ids");
-        }*/
+        }
         if (appoint.getStatus_id().getName().equals("Negotiation")) {
             appoint.setStatus_id(statusRepository.findByName("Approved"));
             return appointRepository.save(appoint);
@@ -120,14 +116,10 @@ public class AppointmentController {
                         + appoint.getStatus_id().getName() + " status");
             } else throw new WrongParameterException("You cannot decline other student's appointment");
         } else if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("TEACHER")) {
-            /*List<TeacherData> data = teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
-            List<Integer> allowedIds = new ArrayList<>();
-            for (TeacherData td : data) {
-                allowedIds.add(td.getId());
-            }
-            if (!allowedIds.contains(appoint.getTeacher_data_id().getId())) {
+            if (!appoint.getTeacher_data_id().getTeacher_id().getId()
+                    .equals(userRepository.findByEmail(authentication.getName()).getId())){
                 throw new ParameterMissingException("You cannot use other teacher's ids");
-            }*/
+            }
             if (appoint.getStatus_id().getName().equals("Approved") ||
                     appoint.getStatus_id().getName().equals("Negotiation") ||
                     appoint.getStatus_id().getName().equals("Open")) {
