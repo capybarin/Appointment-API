@@ -2,10 +2,8 @@ package com.example.Appointment.controller;
 
 import com.example.Appointment.entity.Appoint;
 import com.example.Appointment.entity.TeacherData;
-import com.example.Appointment.entity.User;
 import com.example.Appointment.exception.AppointNotFoundException;
 import com.example.Appointment.exception.ParameterMissingException;
-import com.example.Appointment.exception.UserNotFoundException;
 import com.example.Appointment.exception.WrongParameterException;
 import com.example.Appointment.repository.*;
 import com.example.Appointment.service.EmailSenderService;
@@ -13,26 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
-public class Controller {
+public class AppointmentController {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private EmailSenderService emailSenderService;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private StatusRepository statusRepository;
@@ -42,142 +31,6 @@ public class Controller {
 
     @Autowired
     private TeacherDataRepository teacherDataRepository;
-
-    @PostMapping("/register")
-    public User newUser(@RequestBody User newUser) {
-        User tmpUser = new User();
-        if (newUser.getFirstName() == null || newUser.getFirstName().isEmpty()) {
-            throw new ParameterMissingException("firstName");
-        } else {
-            tmpUser.setFirstName(newUser.getFirstName());
-        }
-        if (newUser.getLastName() == null || newUser.getLastName().isEmpty()) {
-            throw new ParameterMissingException("lastName");
-        } else {
-            tmpUser.setLastName(newUser.getLastName());
-        }
-        try {
-            if (newUser.getRole_id().getId() == null ||
-                    newUser.getRole_id().getId().toString().isEmpty()) {
-                throw new ParameterMissingException("role id");
-            } else {
-                if (newUser.getRole_id().getId().equals(1)) {
-                    tmpUser.setRole_id(roleRepository.findByName("STUDENT"));
-                } else if (newUser.getRole_id().getId().equals(2)) {
-                    tmpUser.setRole_id(roleRepository.findByName("TEACHER"));
-                } else throw new ParameterMissingException("role id");
-            }
-        } catch (NullPointerException e) {
-            throw new ParameterMissingException("role_id");
-        }
-        if (newUser.getEmail() == null || newUser.getEmail().isEmpty()) {
-            throw new ParameterMissingException("email");
-        } else {
-            tmpUser.setEmail(newUser.getEmail());
-        }
-        if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-            throw new ParameterMissingException("password");
-        } else {
-            tmpUser.setPassword(newUser.getPassword());
-        }
-        emailSenderService.sendHelloMessage(tmpUser);
-        try {
-            return userRepository.save(tmpUser);
-        } catch (Exception e) {
-            throw new ParameterMissingException("email");
-        }
-    }
-
-    @GetMapping("/users")
-    public List<User> all(@RequestParam(value = "role", defaultValue = "all") String role) {
-        switch (role.toLowerCase()){
-            case "student": return userRepository.findAllByRole_id(1);
-            case "teacher": return userRepository.findAllByRole_id(2);
-            case "all": return userRepository.findAll();
-            default: return userRepository.findAll();
-        }
-    }
-
-    @GetMapping("/users/{id}")
-    public User one(@PathVariable Integer id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    @PostMapping("/teacher/data")
-    public TeacherData newData(@RequestBody TeacherData newData, Authentication authentication) {
-        TeacherData tmp = new TeacherData();
-        LocalDate localDate = LocalDate.now();
-        Date from;
-        Date to;
-        Date currDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-        if (newData.getWorkfrom() == null) {
-            throw new ParameterMissingException("workfrom");
-        }
-        try {
-            from = simpleDateFormat.parse(String.valueOf(newData.getWorkfrom()));
-        } catch (ParseException e) {
-            throw new WrongParameterException("Invalid \"workfrom\" parameter");
-        }
-        if (newData.getWorkto() == null) {
-            throw new ParameterMissingException("workto");
-        }
-        try {
-            to = simpleDateFormat.parse(String.valueOf(newData.getWorkto()));
-        } catch (ParseException e) {
-            throw new WrongParameterException("Invalid \"workto\" parameter");
-        }
-        if (from.after(to)) {
-            throw new WrongParameterException("\"workto\" should not be before current \"workfrom\"");
-        } else {
-            tmp.setWorkfrom(Time.valueOf(String.valueOf(newData.getWorkfrom())));
-            tmp.setWorkto(Time.valueOf(String.valueOf(newData.getWorkto())));
-        }
-        if (newData.getCurrency() == null || newData.getCurrency().isEmpty()) {
-            throw new ParameterMissingException("currency");
-        } else {
-            tmp.setCurrency(newData.getCurrency());
-        }
-        if (newData.getPrice() == null || newData.getPrice().isEmpty()) {
-            throw new ParameterMissingException("price");
-        } else {
-            tmp.setPrice(newData.getPrice());
-        }
-        tmp.setTeacher_id(userRepository.findByEmail(authentication.getName()));
-
-        if (newData.getDate() == null) {
-            throw new ParameterMissingException("date");
-        }
-        Date toBeParsed;
-        try {
-            toBeParsed = sdf.parse(String.valueOf(newData.getDate()));
-        } catch (ParseException e) {
-            throw new WrongParameterException("Invalid \"date\" parameter");
-        }
-        if (toBeParsed.before(currDate)) {
-            throw new WrongParameterException("Your \"date\" should not be before current date");
-        }
-        tmp.setDate(newData.getDate());
-
-        if (!teacherDataRepository.findIfTimeSlotExists(userRepository.findByEmail(authentication.getName()).getId(),
-                newData.getDate(), newData.getWorkfrom()).isEmpty()) {
-            throw new WrongParameterException("Time slots intersecting error");
-        } else {
-            return teacherDataRepository.save(tmp);
-        }
-    }
-
-    @GetMapping("/teacher/data/me")
-    public List<TeacherData> getDataForCurrentUser(Authentication authentication) {
-        return teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
-    }
-
-    @GetMapping("/teacher/data")
-    public List<TeacherData> teacherData() {
-        return teacherDataRepository.findAll();
-    }
 
     @PostMapping("/appointment")
     public Appoint newAppoint(@RequestBody Appoint newAppoint, Authentication authentication) {
@@ -204,7 +57,7 @@ public class Controller {
     }
 
     @GetMapping("/appointment")
-    public List<Appoint> getAllAppoints(@RequestParam (value = "status", defaultValue = "excludeDeclined") String status) {
+    public List<Appoint> getAllAppoints(@RequestParam(value = "status", defaultValue = "excludeDeclined") String status) {
         switch (status.toLowerCase()){
             case "all": return appointRepository.findAll();
             case "approved": return appointRepository.findAllApproved();
@@ -240,14 +93,14 @@ public class Controller {
         if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("STUDENT")) {
             throw new WrongParameterException("Students cannot accept reservations");
         }
-        List<TeacherData> teacherData = teacherDataRepository.findAllByTeacher_id(appoint.getTeacher_data_id().getId());
+        /*List<TeacherData> teacherData = teacherDataRepository.findAllByTeacher_id(appoint.getTeacher_data_id().getId());
         List<Integer> allowedIds = new ArrayList<>();
         for (TeacherData td : teacherData) {
             allowedIds.add(td.getId());
         }
         if (!allowedIds.contains(appoint.getTeacher_data_id().getId())) {
             throw new ParameterMissingException("You cannot use other teacher's ids");
-        }
+        }*/
         if (appoint.getStatus_id().getName().equals("Negotiation")) {
             appoint.setStatus_id(statusRepository.findByName("Approved"));
             return appointRepository.save(appoint);
@@ -265,16 +118,16 @@ public class Controller {
                     appoint.setStatus_id(statusRepository.findByName("Declined"));
                 } else throw new WrongParameterException("You can't decline Appointment that is in the "
                         + appoint.getStatus_id().getName() + " status");
-            } else throw new ParameterMissingException("You cannot decline other student's appointment");
+            } else throw new WrongParameterException("You cannot decline other student's appointment");
         } else if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("TEACHER")) {
-            List<TeacherData> data = teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
+            /*List<TeacherData> data = teacherDataRepository.findAllByTeacher_id(userRepository.findByEmail(authentication.getName()).getId());
             List<Integer> allowedIds = new ArrayList<>();
             for (TeacherData td : data) {
                 allowedIds.add(td.getId());
             }
             if (!allowedIds.contains(appoint.getTeacher_data_id().getId())) {
                 throw new ParameterMissingException("You cannot use other teacher's ids");
-            }
+            }*/
             if (appoint.getStatus_id().getName().equals("Approved") ||
                     appoint.getStatus_id().getName().equals("Negotiation") ||
                     appoint.getStatus_id().getName().equals("Open")) {
@@ -285,4 +138,5 @@ public class Controller {
         }
         return appointRepository.save(appoint);
     }
+
 }
