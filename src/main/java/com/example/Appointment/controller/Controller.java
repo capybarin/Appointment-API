@@ -251,11 +251,13 @@ public class Controller {
     public Appoint declineReservation(@PathVariable Integer id, Authentication authentication) {
         Appoint appoint = appointRepository.findById(id).orElseThrow(() -> new AppointNotFoundException(id));
         if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("STUDENT")) {
-            if (appoint.getStatus_id().getName().equals("Approved") ||
-                    appoint.getStatus_id().getName().equals("Negotiation")) {
-                appoint.setStatus_id(statusRepository.findByName("Declined"));
-            } else throw new WrongParameterException("You can't decline Appointment that is in the "
-                    + appoint.getStatus_id().getName() + " status");
+            if (appoint.getStudent_id().getId().equals(userRepository.findByEmail(authentication.getName()).getId())) {
+                if (appoint.getStatus_id().getName().equals("Approved") ||
+                        appoint.getStatus_id().getName().equals("Negotiation")) {
+                    appoint.setStatus_id(statusRepository.findByName("Declined"));
+                } else throw new WrongParameterException("You can't decline Appointment that is in the "
+                        + appoint.getStatus_id().getName() + " status");
+            } else throw new ParameterMissingException("You cannot decline other student's appointment");
         } else if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("TEACHER")) {
             if (appoint.getStatus_id().getName().equals("Approved") ||
                     appoint.getStatus_id().getName().equals("Negotiation") ||
