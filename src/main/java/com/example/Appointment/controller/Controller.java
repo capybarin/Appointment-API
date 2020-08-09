@@ -90,12 +90,12 @@ public class Controller {
 
     @GetMapping("/users")
     public List<User> all(@RequestParam(value = "role", defaultValue = "all") String role) {
-        if (role.toLowerCase().equals("student")) {
-            return userRepository.findAllByRole_id(1);
-        } else if (role.toLowerCase().equals("teacher")) {
-            return userRepository.findAllByRole_id(2);
+        switch (role.toLowerCase()){
+            case "student": return userRepository.findAllByRole_id(1);
+            case "teacher": return userRepository.findAllByRole_id(2);
+            case "all": return userRepository.findAll();
+            default: return userRepository.findAll();
         }
-        return userRepository.findAll();
     }
 
     @GetMapping("/users/{id}")
@@ -239,6 +239,14 @@ public class Controller {
         Appoint appoint = appointRepository.findById(id).orElseThrow(() -> new AppointNotFoundException(id));
         if (userRepository.findByEmail(authentication.getName()).getRole_id().getName().equals("STUDENT")) {
             throw new WrongParameterException("Students cannot accept reservations");
+        }
+        List<TeacherData> teacherData = teacherDataRepository.findAllByTeacher_id(appoint.getTeacher_data_id().getId());
+        List<Integer> allowedIds = new ArrayList<>();
+        for (TeacherData td : teacherData) {
+            allowedIds.add(td.getId());
+        }
+        if (!allowedIds.contains(appoint.getTeacher_data_id().getId())) {
+            throw new ParameterMissingException("You cannot use other teacher's ids");
         }
         if (appoint.getStatus_id().getName().equals("Negotiation")) {
             appoint.setStatus_id(statusRepository.findByName("Approved"));
