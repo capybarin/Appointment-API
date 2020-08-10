@@ -2,15 +2,15 @@
 The app uses PostgreSQL 10.6, Spring Boot 2.2.10  
 For the first run, you have to uncomment 3 last lines in application.properties and comment them back after the first run. Swagger 2 API documentation is located at "localhost:8080/swagger-ui.html"
 
-##**appointment-controller**  
-#####GET  
+###  **appointment-controller**  
+##### GET  
 /appointment  
 Returns a list of appointments that are not in Declined status.  
 Parameters (Query string):  
 status(optional), acceptable values - excludeDeclined(by default), all, approved, declined, negotiation, open  
   
   
-#####POST  
+##### POST  
 /appointment  
 Creates a new appointment  
 Parameters (JSON):  
@@ -37,8 +37,8 @@ Declining selected appointment
   
   
   
-##**teacher-data-controller**  
-#####GET  
+###  **teacher-data-controller**  
+##### GET  
 /teacher/data/me  
 Returns all data for a current teacher  
   
@@ -47,7 +47,7 @@ Returns all data for a current teacher
 Returns all data for all teacher  
   
   
-#####POST  
+##### POST  
 /teacher/data  
 Creates a new data for a current teacher  
 Parameters (JSON):  
@@ -66,8 +66,8 @@ date (date in yyyy-MM-dd format, required)
   	"date": "2021-08-10"  
  }  
   
-  ##**user-controller**  
-  #####GET  
+  ### **user-controller**  
+  ##### GET  
   /users  
   Returns a list of all registered users  
   Parameters (Query string):  
@@ -78,7 +78,7 @@ date (date in yyyy-MM-dd format, required)
   Returns a selected user  
   
   
-  #####POST  
+  ##### POST  
   /register  
   Register a new user  
   Parameters (JSON):  
