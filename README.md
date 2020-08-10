@@ -95,7 +95,7 @@ date (date in yyyy-MM-dd format, required)
   	"role_id": {  
   		"id": 1  
   	},  
-  	"email": "voyoxoy805@ofmailer.net",  
+  	"email": "example@mail.box",  
   	"password": "pass"  
   }
   
