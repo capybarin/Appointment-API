@@ -1,55 +1,54 @@
-CREATE TABLE IF NOT EXISTS role
+create table role
 (
-    id   BIGSERIAL NOT NULL PRIMARY KEY ,
-    name VARCHAR(20) NOT NULL
+    id   bigserial   not null
+        constraint role_pkey
+            primary key,
+    name varchar(20) not null
 );
 
-CREATE TABLE IF NOT EXISTS users
+create table users
 (
-    id    BIGSERIAL PRIMARY KEY NOT NULL,
-    firstName  VARCHAR(40) NOT NULL ,
-    lastName  VARCHAR(40) NOT NULL ,
-    role_id  INTEGER NOT NULL ,
-    email VARCHAR(254) NOT NULL ,
-    password VARCHAR(35)  NOT NULL
+    id        bigserial    not null
+        constraint users_pkey
+            primary key,
+    firstname varchar(40)  not null,
+    lastname  varchar(40)  not null,
+    role_id   integer      not null,
+    email     varchar(254) not null,
+    password  varchar(35)  not null
 );
 
-CREATE UNIQUE INDEX user_email_uindex ON users (email);
+create unique index user_email_uindex
+    on users (email);
 
 
-CREATE TABLE IF NOT EXISTS status
+create table status
 (
-    id   BIGSERIAL NOT NULL PRIMARY KEY ,
-    name VARCHAR(20) NOT NULL
+    id   bigserial   not null
+        constraint status_pkey
+            primary key,
+    name varchar(20) not null
 );
 
-CREATE TABLE IF NOT EXISTS appoint
+create table appoint
 (
-    id    BIGSERIAL PRIMARY KEY NOT NULL,
-    date  DATE NOT NULL ,
-    timeStart  TIME NOT NULL ,
-    timeEnd  TIME NOT NULL ,
-    price VARCHAR(15) NOT NULL,
-    teacher_data_id integer not null ,
-    status_id INTEGER NOT NULL ,
-    teacher_id INTEGER NOT NULL ,
-    student_id INTEGER NOT NULL
+    id              bigserial not null
+        constraint appoint_pkey
+            primary key,
+    status_id       integer   not null,
+    student_id      integer,
+    teacher_data_id integer   not null
 );
 
-CREATE TABLE teacher_data
+create table teacher_data
 (
-    id bigserial not null,
-    workFrom time not null,
-    workTo time not null,
-    currency varchar(3) not null,
-    price varchar(8) not null,
-    teacher_id int not null
+    id         bigserial  not null
+        constraint teacher_data_pk
+            primary key,
+    workfrom   time       not null,
+    workto     time       not null,
+    currency   varchar(3) not null,
+    price      varchar(8) not null,
+    teacher_id integer    not null,
+    date       date       not null
 );
-
-create unique index teacher_data_id_uindex
-    on teacher_data (id);
-
-alter table teacher_data
-    add constraint teacher_data_pk
-        primary key (id);
-
