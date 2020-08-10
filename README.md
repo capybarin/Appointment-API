@@ -1,6 +1,8 @@
 # Appointment API
 The app uses PostgreSQL 10.6, Spring Boot 2.2.10  
-For the first run, you have to uncomment 3 last lines in application.properties and comment them back after the first run. Swagger 2 API documentation is located at "localhost:8080/swagger-ui.html"
+For the first run, you have to uncomment 3 last lines in application.properties and comment them back after the first run. Swagger 2 API documentation is located at "localhost:8080/swagger-ui.html"  
+App uses HTTP basic auth
+
 
 ###  **appointment-controller**  
 ##### GET  
